@@ -1,5 +1,10 @@
-import type { GameDoc } from "../../../shared/types";
+import type { GameDoc, DamageSource } from "../../../shared/types";
 import { formatTime } from "../../../shared/math";
+const SOURCE_LABEL: Record<DamageSource, string> = {
+  direct: "直接命中",
+  periodic: "持续伤害",
+  chain: "连锁跳电",
+};
 export function ResultDialog({
   doc,
   restart,
@@ -7,6 +12,9 @@ export function ResultDialog({
   doc: GameDoc;
   restart: () => void;
 }) {
+  const total = doc.stats.bySource.direct +
+    doc.stats.bySource.periodic +
+    doc.stats.bySource.chain;
   return (
     <div className="overlay">
       <div className="result-dialog">
@@ -30,13 +38,22 @@ export function ResultDialog({
           </div>
         </div>
         <div className="damage-breakdown">
-          {Object.entries(doc.stats.byWeapon).map(([key, value]) => (
-            <div key={key}>
-              <span>{key.toUpperCase()}</span>
-              <span>{Math.round(value)} DMG</span>
-            </div>
-          ))}
+          {(["direct", "periodic", "chain"] as DamageSource[]).map((key) => {
+            const value = doc.stats.bySource[key];
+            const share = total ? (value / total) * 100 : 0;
+            return (
+              <div key={key}>
+                <span>{SOURCE_LABEL[key]}</span>
+                <span className="mono">
+                  {Math.round(value)} DMG · {share.toFixed(0)}%
+                </span>
+              </div>
+            );
+          })}
         </div>
+        <p className="tiny">
+          三类贡献合计 {Math.round(total)} = 实际扣血 {Math.round(doc.stats.damage)}
+        </p>
         <button className="primary" onClick={restart}>
           重新接入 ↗
         </button>

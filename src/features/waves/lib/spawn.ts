@@ -25,5 +25,6 @@ export function spawnEnemy(doc: GameDoc): Enemy {
     maxHp: hp,
     radius: data.radius,
     cooldown: 1 + random(doc),
+    statuses: {},
   };
 }

@@ -532,6 +532,22 @@ kbd {
 .level-pips i.active {
   background: #b2ebbd;
 }
+.status-tag {
+  position: absolute;
+  top: 7px;
+  right: 9px;
+  font:
+    8px "Space Grotesk",
+    monospace;
+  letter-spacing: 0.6px;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  opacity: 0.9;
+}
+.weapon.locked .status-tag {
+  opacity: 0.45;
+}
 .hint {
   font-size: 10px;
   color: #a1b3a6;
@@ -561,6 +577,15 @@ kbd {
   font-size: 16px;
   font-weight: 400;
   color: #d9e3e5;
+}
+.stat-row.sub {
+  margin-top: 7px;
+  padding-left: 10px;
+  border-left: 2px solid #2c4837;
+}
+.stat-row.sub strong {
+  font-size: 13px;
+  color: #a9c7b2;
 }
 .tip {
   padding: 18px 17px;

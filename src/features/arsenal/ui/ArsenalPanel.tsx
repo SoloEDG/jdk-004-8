@@ -1,4 +1,5 @@
 import type { GameDoc, WeaponId } from "../../../shared/types";
+import { STATUS_CONFIG, WEAPON_STATUS } from "../../combat/model/statuses";
 const names: Record<WeaponId, [string, string, string]> = {
   pulse: ["脉冲射线", "PULSE RIFLE", "⌁"],
   orbit: ["轨道刃", "ORBITAL BLADE", "◎"],
@@ -14,6 +15,7 @@ export function ArsenalPanel({ doc }: { doc: GameDoc }) {
       <div className="weapons">
         {(["pulse", "orbit", "nova"] as WeaponId[]).map((id) => {
           const w = doc.weapons.find((w) => w.id === id);
+          const status = WEAPON_STATUS[id];
           return (
             <div className={`weapon ${w ? "" : "locked"}`} key={id}>
               <div className={`weapon-icon ${id}`}>{names[id][2]}</div>
@@ -31,14 +33,20 @@ export function ArsenalPanel({ doc }: { doc: GameDoc }) {
                   ))}
                 </div>
               )}
+              <span
+                className="status-tag"
+                style={{ color: STATUS_CONFIG[status].color }}
+              >
+                {STATUS_CONFIG[status].label}
+              </span>
             </div>
           );
         })}
       </div>
       <div className="hint">
-        ↗ 自动锁定最近目标
+        ↗ 自动锁定最近目标，命中附加元素状态
         <br />
-        <span>升级时选择新武器，构筑你的火力组合。</span>
+        <span>燃烧周期灼烧 · 冰缓减速压制 · 导电连锁跳电，状态可叠加且来源独立追溯。</span>
       </div>
     </section>
   );

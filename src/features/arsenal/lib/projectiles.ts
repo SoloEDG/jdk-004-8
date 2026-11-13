@@ -1,4 +1,4 @@
-import type { GameDoc, WeaponId, Vec } from "../../../shared/types";
+import type { GameDoc, WeaponId, Vec, StatusId } from "../../../shared/types";
 export function fire(
   doc: GameDoc,
   weapon: WeaponId,
@@ -6,6 +6,7 @@ export function fire(
   damage: number,
   speed: number,
   pierce: number,
+  status?: StatusId,
   origin: Vec = doc.player,
 ): void {
   doc.bullets.push({
@@ -21,6 +22,7 @@ export function fire(
     weapon,
     pierce,
     hit: [],
+    status,
   });
 }
 export function nearestTarget(doc: GameDoc): Vec | undefined {

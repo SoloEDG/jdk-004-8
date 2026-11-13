@@ -2,6 +2,7 @@ import type { GameDoc } from "../../../shared/types";
 import { distance, normalize } from "../../../shared/math";
 import { spawnEnemy } from "../lib/spawn";
 import { ENEMY_CATALOG, WAVE_DURATION, TOTAL_WAVES } from "./catalog";
+import { chillCooldownFactor, chillMoveFactor } from "../../combat/model/statuses";
 export function stepWaves(doc: GameDoc, dt: number): void {
   if (doc.victory) return;
   if (doc.wave === 0) {
@@ -30,12 +31,18 @@ export function stepWaves(doc: GameDoc, dt: number): void {
       range = distance(enemy, doc.player);
     const standOff =
       enemy.kind === "shooter" ? (range < 170 ? -1 : range < 245 ? 0 : 1) : 1;
-    const speed = ENEMY_CATALOG[enemy.kind].speed * (1 + doc.wave * 0.035);
+    // 冰缓独立作用于该敌人：移动速度按 slowFactor 衰减，可与其他状态共存。
+    const speed =
+      ENEMY_CATALOG[enemy.kind].speed *
+      (1 + doc.wave * 0.035) *
+      chillMoveFactor(enemy);
     enemy.x += toward.x * speed * standOff * dt;
     enemy.y += toward.y * speed * standOff * dt;
     enemy.cooldown -= dt;
     if (enemy.kind !== "chaser" && enemy.cooldown <= 0) {
-      enemy.cooldown = enemy.kind === "elite" ? 1.8 : 2.6;
+      // 冰缓延长开火冷却，等价于发射频率下降。
+      enemy.cooldown =
+        (enemy.kind === "elite" ? 1.8 : 2.6) * chillCooldownFactor(enemy);
       const angle = Math.atan2(toward.y, toward.x),
         spread = enemy.kind === "elite" ? [-0.24, 0, 0.24] : [0];
       for (const offset of spread) {

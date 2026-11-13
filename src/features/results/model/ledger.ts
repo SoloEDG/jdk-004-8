@@ -7,6 +7,8 @@ export function applyEvents(doc: GameDoc, events: FrameEvents): void {
   doc.stats.collected += events.collected;
   for (const weapon of ["pulse", "orbit", "nova"] as const)
     doc.stats.byWeapon[weapon] += events.weaponDamage?.[weapon] || 0;
+  for (const source of ["direct", "periodic", "chain"] as const)
+    doc.stats.bySource[source] += events.bySource[source];
 }
 export function makeRecord(doc: GameDoc): RunRecord {
   return {

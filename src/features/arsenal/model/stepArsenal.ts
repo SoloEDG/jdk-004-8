@@ -1,6 +1,7 @@
 import type { GameDoc, Input } from "../../../shared/types";
 import { fire, nearestTarget } from "../lib/projectiles";
 import { WEAPON_CATALOG } from "./catalog";
+import { WEAPON_STATUS } from "../../combat/model/statuses";
 export function stepArsenal(doc: GameDoc, input: Input, dt: number): number {
   let shots = 0;
   const target = nearestTarget(doc),
@@ -31,6 +32,7 @@ export function stepArsenal(doc: GameDoc, input: Input, dt: number): number {
           damage,
           440,
           doc.upgrades.pierce || 0,
+          WEAPON_STATUS.pulse,
         );
         shots++;
       }
@@ -45,6 +47,7 @@ export function stepArsenal(doc: GameDoc, input: Input, dt: number): number {
           damage,
           weapon.id === "orbit" ? 150 : 240,
           weapon.id === "orbit" ? 3 : 1,
+          WEAPON_STATUS[weapon.id],
         );
         shots++;
       }

@@ -1,21 +1,15 @@
-import type { GameDoc, Input, FrameEvents } from "../../../shared/types";
+import type { GameDoc, Input, WeaponId } from "../../../shared/types";
 import { WIDTH, HEIGHT } from "../../../shared/types";
 import { clamp, distance, normalize } from "../../../shared/math";
 import { segmentDistance } from "../lib/collision";
 import { hurtPlayer } from "./health";
+import { applyDamage, applyStatus, makeFrameEvents } from "./statuses";
 export function stepCombat(
   doc: GameDoc,
   input: Input,
   dt: number,
-): FrameEvents {
-  const events: FrameEvents = {
-    kills: [],
-    damage: 0,
-    taken: 0,
-    shots: 0,
-    collected: 0,
-    weaponDamage: {},
-  };
+) {
+  const events = makeFrameEvents();
   const player = doc.player;
   player.invincible = Math.max(0, player.invincible - dt);
   const direction = normalize(input.x, input.y),
@@ -54,17 +48,18 @@ export function stepCombat(
       )
         continue;
       bullet.hit.push(enemy.id);
-      const damage = Math.min(enemy.hp, bullet.damage);
-      enemy.hp -= damage;
-      events.damage += damage;
-      if (bullet.weapon !== "enemy")
-        events.weaponDamage![bullet.weapon] =
-          (events.weaponDamage![bullet.weapon] || 0) + damage;
-      if (enemy.hp <= 0)
-        events.kills.push({
-          enemy: { ...enemy },
-          weapon: bullet.weapon === "enemy" ? "pulse" : bullet.weapon,
-        });
+      const weapon: WeaponId = bullet.weapon as WeaponId;
+      // 直接命中通过统一漏斗扣血，过量伤害不会计入任何来源。
+      applyDamage(
+        doc,
+        enemy,
+        bullet.damage,
+        "direct",
+        weapon,
+        events,
+      );
+      // 命中即施加武器元素状态；状态独立保留施加者与剩余时间，可与已有状态叠加。
+      if (bullet.status) applyStatus(enemy.statuses, bullet.status, weapon, bullet.damage);
       if (bullet.pierce <= 0) {
         bullet.life = -1;
         break;

@@ -14,6 +14,8 @@ const events = (): FrameEvents => ({
   taken: 0,
   shots: 0,
   collected: 0,
+  bySource: { direct: 0, periodic: 0, chain: 0 },
+  weaponDamage: {},
 });
 const enemy = (id = 1) => ({
   id,
@@ -24,6 +26,7 @@ const enemy = (id = 1) => ({
   maxHp: 10,
   radius: 12,
   cooldown: 0,
+  statuses: {},
 });
 test("automatic fire acquires a target without pointer firing", () => {
   const d = createRun();

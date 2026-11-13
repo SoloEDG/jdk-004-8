@@ -1,5 +1,11 @@
-import type { GameDoc } from "../../../shared/types";
+import type { GameDoc, StatusId } from "../../../shared/types";
 import { WIDTH, HEIGHT } from "../../../shared/types";
+import { STATUS_CONFIG, activeStatuses } from "../model/statuses";
+const STATUS_GLYPH: Record<StatusId, string> = {
+  burn: "▲",
+  chill: "❄",
+  shock: "⚡",
+};
 export function renderScene(ctx: CanvasRenderingContext2D, d: GameDoc) {
   ctx.clearRect(0, 0, WIDTH, HEIGHT);
   ctx.fillStyle = "#0a1019";
@@ -73,6 +79,37 @@ export function renderScene(ctx: CanvasRenderingContext2D, d: GameDoc) {
       ctx.fillStyle = "#ef7287";
       ctx.fillRect(e.x - 14, e.y - 22, (28 * e.hp) / e.maxHp, 2);
     }
+    const statuses = activeStatuses(e);
+    if (statuses.length) {
+      ctx.font = "9px monospace";
+      ctx.textAlign = "center";
+      statuses.forEach((id, index) => {
+        const offset = (index - (statuses.length - 1) / 2) * 11;
+        ctx.fillStyle = STATUS_CONFIG[id].color;
+        ctx.shadowColor = STATUS_CONFIG[id].color;
+        ctx.shadowBlur = 6;
+        ctx.fillText(STATUS_GLYPH[id], e.x + offset, e.y - e.radius - 7);
+      });
+      ctx.shadowBlur = 0;
+      ctx.textAlign = "start";
+    }
+  }
+  for (const arc of d.arcFx) {
+    const alpha = Math.max(0, arc.life / 0.18);
+    ctx.strokeStyle = STATUS_CONFIG.shock.color;
+    ctx.globalAlpha = alpha;
+    ctx.shadowColor = STATUS_CONFIG.shock.color;
+    ctx.shadowBlur = 10;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(arc.x, arc.y);
+    const midX = (arc.x + arc.toX) / 2 + (Math.random() - 0.5) * 10;
+    const midY = (arc.y + arc.toY) / 2 + (Math.random() - 0.5) * 10;
+    ctx.lineTo(midX, midY);
+    ctx.lineTo(arc.toX, arc.toY);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
   }
   for (const b of d.bullets) {
     ctx.fillStyle =
